@@ -1,9 +1,12 @@
-program SmartPtr;
+program SmartObj;
 
 {$MODE DELPHI}
 
+uses
+  SysUtils, Classes;
+
 type
-  TMyObj = class
+  TMyObj = class(TStringList)
   public
     constructor Create;
     destructor Destroy; override;
@@ -22,19 +25,19 @@ end;
 type
   TSmartObj<T: TObject> = record
     // similar as overloading [] operators for property x[v: string]: integer read gx write sx; default;
-    Instance: T; //default; // default keyword for non property, can be used only for field of pointer type.
+    Instance: T default; // default keyword for non property.
     RefCount: PLongint;
 
     procedure SmartFinalize();
 
     class operator Initialize(var aRec: TSmartObj<T>);
     class operator Finalize(var aRec: TSmartObj<T>);
-    class operator AddRef(var aRec: TSmartObj<T>);
-    class operator Copy(constref aSource: TSmartObj<T>; var aDest: TSmartObj<T>);
+    class operator Copy(var aRec: TSmartObj<T>);
+    class operator Clone(constref aSource: TSmartObj<T>; var aDest: TSmartObj<T>);
 
-    // implicit or explicit operator should be used before "default" field
-    procedure Assign(const aValue: T); // special version of Implicit/Explicit is also needed (available only when is used default for field)
-    //operator Explicit: TRawSmartPtr;
+    // implicit or explicit operator is used before "default" field
+    class operator Implicit(aObj: T): TSmartObj<T>;
+    procedure Assign(const aValue: T);
   end;
 
 procedure TSmartObj<T>.SmartFinalize();
@@ -61,14 +64,14 @@ begin
   aRec.SmartFinalize();
 end;
 
-class operator TSmartObj<T>.AddRef(var aRec: TSmartObj<T>);
+class operator TSmartObj<T>.Copy(var aRec: TSmartObj<T>);
 begin
   WriteLn('AddRef');
   if aRec.RefCount <> nil then
     InterLockedIncrement(aRec.RefCount^);
 end;
 
-class operator TSmartObj<T>.Copy(constref aSource: TSmartObj<T>; var aDest: TSmartObj<T>);
+class operator TSmartObj<T>.Clone(constref aSource: TSmartObj<T>; var aDest: TSmartObj<T>);
 begin
   WriteLn('Copy');
   if aDest.RefCount <> nil then
@@ -77,6 +80,12 @@ begin
     InterLockedIncrement(aSource.RefCount^);
   aDest.RefCount := aSource.RefCount;
   aDest.Instance := aSource.Instance;
+end;
+
+class operator TSmartObj<T>.Implicit(aObj: T): TSmartObj<T>;
+begin
+  WriteLn('Implicit');
+  Result.Assign(aObj);
 end;
 
 procedure TSmartObj<T>.Assign(const aValue: T);
@@ -91,16 +100,28 @@ begin
   Instance := aValue;
 end;
 
+
+procedure Foo;
+var
+  x: TSmartObj<TObject>;
+begin
+  x := TList.Create;
+end;
+
 var
   a, b: TSmartObj<TMyObj>;
   dynA, dynB: array of TSmartObj<TMyObj>;
   i: Integer;
-begin 
+begin
+  Foo;
   WriteLn('BEGIN');   
  
-  WriteLn('> a.Assign(New(PInteger)) ');   
-  a.Assign(TMyObj.Create);
-  
+  WriteLn('> a.Assign(TMyObj.Create) ');
+  a := TMyObj.Create;
+  a.Add('Foo');
+  WriteLn('>>> ', a.ClassName);
+  WriteLn('>>> ', a.UnitName);
+
   WriteLn('> b := a');
   b := a;
   
@@ -114,5 +135,75 @@ begin
   WriteLn('> dynB := Copy(dynA)');
   dynB := Copy(dynA);
       
-  WriteLn('END.');   
+  WriteLn('END.'); 
+
+{ OUTPUT :
+
+Initialize
+Initialize
+Initialize
+Initialize
+Implicit
+Finalize
+ SmartFinalize
+  Dispose :)
+BEGIN
+> a.Assign(TMyObj.Create)
+TMyObj.Create
+Implicit
+Copy
+>>> TMyObj
+>>> SmartObj
+> b := a
+Copy
+> SetLength(dynA, 5)
+Initialize
+Initialize
+Initialize
+Initialize
+Initialize
+> for i := 0 to High(dynA) do
+> dynA[i] := b
+Copy
+Copy
+Copy
+Copy
+Copy
+> dynB := Copy(dynA)
+AddRef
+AddRef
+AddRef
+AddRef
+AddRef
+END.
+Finalize
+ SmartFinalize
+Finalize
+ SmartFinalize
+Finalize
+ SmartFinalize
+Finalize
+ SmartFinalize
+Finalize
+ SmartFinalize
+Finalize
+ SmartFinalize
+Finalize
+ SmartFinalize
+Finalize
+ SmartFinalize
+Finalize
+ SmartFinalize
+Finalize
+ SmartFinalize
+Finalize
+ SmartFinalize
+Finalize
+ SmartFinalize
+Finalize
+ SmartFinalize
+TMyObj.Destroy
+  Dispose :)
+  
+}
 end.
