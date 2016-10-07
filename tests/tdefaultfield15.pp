@@ -1,6 +1,6 @@
 { %FAIL }
 
-program tdefault15;
+program tdefaultfield15;
 
 {$MODE DELPHI}
 

@@ -1,4 +1,4 @@
-program tdefault25;
+program tdefaultfield25;
 
 {$MODE DELPHI}
 

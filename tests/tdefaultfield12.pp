@@ -1,10 +1,12 @@
-program tdefault23;
+program tdefaultfield12;
 
 {$MODE DELPHI}
 
 type
   TFoo = record
+    Field1: Integer;
     DefaultValue: TProcedure default;
+    Field2: Integer;
   end;
   
 var
@@ -17,11 +19,9 @@ end;
 
 var  
   a: TFoo;
-  pa: ^TFoo;
 begin
   a := Foo;
-  pa := @a;
-  pa^;
+  a;
   if not ok then
     Halt(1);
 end.

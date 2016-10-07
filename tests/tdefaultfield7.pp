@@ -1,11 +1,9 @@
-{ %FAIL }
-
-program tdefault13;
+program tdefaultfield7;
 
 {$MODE DELPHI}
-{$T+}
 
 type
+  PFoo = ^TFoo;
   TFoo = record
     Field1: Integer;
     DefaultValue: Integer default;
@@ -14,7 +12,12 @@ type
 
 var  
   a: TFoo;
-  p: PInteger;
+  pa: PFoo;
+  ptrToFoo: Pointer;
 begin
-  p := @@a;
+  ptrToFoo := @@a;
+  pa := @a;
+  
+  if ptrToFoo <> pa then
+    Halt(1); 
 end.
