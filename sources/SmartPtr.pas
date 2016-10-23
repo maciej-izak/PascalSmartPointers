@@ -1,12 +1,11 @@
 unit SmartPtr;
 
 {$MODE DELPHI}
-{$MACRO ON}
 
 interface
 
 type
-  TSmartPtr<T> = proxy
+  TSmartPtr<T> = record
     // similar as overloading [] operators for property x[v: string]: integer read gx write sx; default;
     Instance: T default; // default keyword for non property.
     RefCount: PLongint;
@@ -25,12 +24,14 @@ type
 
 implementation
 
+{ TSmartPtr }
+
 procedure TSmartPtr<T>.SmartFinalize();
 begin
   if RefCount <> nil then
     if InterLockedDecrement(RefCount^)=0 then
     begin
-      Dispose(RefCount);
+      FreeMem(RefCount);
       Dispose(Instance);
     end;
 end;
@@ -71,7 +72,7 @@ begin
   if RefCount <> nil then
     SmartFinalize();
 
-  New(RefCount);
+  GetMem(RefCount, SizeOf(Longint));
   RefCount^ := 0;
 
   InterLockedIncrement(RefCount^);
