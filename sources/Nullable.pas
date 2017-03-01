@@ -42,8 +42,8 @@ type
 
     class operator Initialize(var A: TNullable<T>);
     class operator Finalize(var A: TNullable<T>);
-    class operator Clone(constref Src: TNullable<T>; var Dest: TNullable<T>);
-    class operator Copy(var Rec: TNullable<T>);
+    class operator Copy(constref Src: TNullable<T>; var Dest: TNullable<T>);
+    class operator AddRef(var Rec: TNullable<T>);
   end;
 
 implementation
@@ -112,7 +112,7 @@ begin
     Dispose(A.Instance);
 end;
 
-class operator TNullable<T>.Clone(constref Src: TNullable<T>; var Dest: TNullable<T>);
+class operator TNullable<T>.Copy(constref Src: TNullable<T>; var Dest: TNullable<T>);
 begin
   if Assigned(Dest.Instance) and Assigned(Src.Instance) then
     Dest.Instance^ := Src.Instance^
@@ -130,7 +130,7 @@ begin
   end;
 end;
 
-class operator TNullable<T>.Copy(var Rec: TNullable<T>);
+class operator TNullable<T>.AddRef(var Rec: TNullable<T>);
 var
   Tmp: T;
 begin

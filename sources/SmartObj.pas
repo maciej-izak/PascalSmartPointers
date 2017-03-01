@@ -30,8 +30,8 @@ type
 
     class operator Initialize(var aRec: TSmartObj<T>);
     class operator Finalize(var aRec: TSmartObj<T>);
-    class operator Copy(var aRec: TSmartObj<T>);
-    class operator Clone(constref aSource: TSmartObj<T>; var aDest: TSmartObj<T>);
+    class operator AddRef(var aRec: TSmartObj<T>);
+    class operator Copy(constref aSource: TSmartObj<T>; var aDest: TSmartObj<T>);
 
     // implicit or explicit operator is used before "default" field
     class operator Implicit(aObj: T): TSmartObj<T>;
@@ -60,13 +60,13 @@ begin
   aRec.SmartFinalize();
 end;
 
-class operator TSmartObj<T>.Copy(var aRec: TSmartObj<T>);
+class operator TSmartObj<T>.AddRef(var aRec: TSmartObj<T>);
 begin
   if aRec.RefCount <> nil then
     InterLockedIncrement(aRec.RefCount^);
 end;
 
-class operator TSmartObj<T>.Clone(constref aSource: TSmartObj<T>; var aDest: TSmartObj<T>);
+class operator TSmartObj<T>.Copy(constref aSource: TSmartObj<T>; var aDest: TSmartObj<T>);
 begin
   if aDest.RefCount <> nil then
     aDest.SmartFinalize();

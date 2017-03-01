@@ -27,8 +27,8 @@ type
 
     class operator Initialize(var aRec: TSmartPtr<T>);
     class operator Finalize(var aRec: TSmartPtr<T>);
-    class operator Copy(var aRec: TSmartPtr<T>);
-    class operator Clone(constref aSource: TSmartPtr<T>; var aDest: TSmartPtr<T>);
+    class operator AddRef(var aRec: TSmartPtr<T>);
+    class operator Copy(constref aSource: TSmartPtr<T>; var aDest: TSmartPtr<T>);
 
     // implicit or explicit operator should be used before "default" field
     class operator Implicit(aValue: T): TSmartPtr<T>;
@@ -59,13 +59,13 @@ begin
   aRec.SmartFinalize();
 end;
 
-class operator TSmartPtr<T>.Copy(var aRec: TSmartPtr<T>);
+class operator TSmartPtr<T>.AddRef(var aRec: TSmartPtr<T>);
 begin
   if aRec.RefCount <> nil then
     InterLockedIncrement(aRec.RefCount^);
 end;
 
-class operator TSmartPtr<T>.Clone(constref aSource: TSmartPtr<T>; var aDest: TSmartPtr<T>);
+class operator TSmartPtr<T>.Copy(constref aSource: TSmartPtr<T>; var aDest: TSmartPtr<T>);
 begin
   if aDest.RefCount <> nil then
     aDest.SmartFinalize();

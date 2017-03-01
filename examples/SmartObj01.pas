@@ -1,6 +1,7 @@
 program SmartObj01;
 
 {$MODE DELPHI}
+{$APPTYPE CONSOLE}
 
 uses
   heaptrc,

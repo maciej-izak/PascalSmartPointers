@@ -1,6 +1,7 @@
 program SmartPtr01;
 
 {$MODE DELPHI}
+{$APPTYPE CONSOLE}
 
 uses
   heaptrc,
